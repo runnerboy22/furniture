@@ -29,6 +29,13 @@ async function uHaul(url) {
 
   console.log(jsonData);
 
+  // create array of locations and prices
+
+  await page.click('#viewRates_815025');
+
+  // next i want to collect prices and unit sizes to determine best price per sq ft
+  // make selection
+
   // setTimeout(async () => {
   //   await browser.close();
   // }, 5000);
