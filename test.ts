@@ -23,8 +23,16 @@ async function uHaul(url: string): Promise<void> {
     '#locationSearchForm > fieldset > div > div > div.cell.large-2.align-self-bottom > button'
   );
 
-  await page.waitForSelector(
-    '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(2) > div.cell.medium-auto.large-3.text-right.show-for-medium > dl > dd > div > div:nth-child(2) > span'
+  // await page.waitForSelector(
+  //   '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(2) > div.cell.medium-auto.large-3.text-right.show-for-medium > dl > dd > div > div:nth-child(2) > span'
+  // );
+
+  // await page.waitForTimeout(5000);
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  const locations = await page.$$eval(
+    '#storageResults > li:nth-child(n) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a',
+    (elements) => elements.map((el) => el.textContent?.trim())
   );
   const prices = await page.$$eval(
     // '#storageResults > li',
@@ -32,8 +40,29 @@ async function uHaul(url: string): Promise<void> {
     (elements) => elements.map((el) => el.textContent?.trim())
   );
 
-  const jsonPrices = JSON.stringify({ prices });
-  console.log(jsonPrices);
+  //   const locationPricePairs: { [location: string]: string } = {};
+  // locations.forEach((location, index) => {
+  //   locationPricePairs[location] = prices[index];
+  // });
+
+  const locationPricePairs: { [location: string]: string } = {};
+
+  locations.forEach((location, index) => {
+    const trimmedLocation = location?.trim(); // Safely trim the location
+    const trimmedPrice = prices[index]?.trim(); // Safely trim the price
+
+    // Only add to the object if both location and price are defined and not empty
+    if (trimmedLocation && trimmedPrice) {
+      locationPricePairs[trimmedLocation] = trimmedPrice;
+    }
+  });
+
+  console.log(locationPricePairs);
+
+  console.log(prices);
+  console.log(locations);
+  // const jsonPrices = JSON.stringify({ prices });
+  // console.log(jsonPrices);
   // if (prices) {
   //   // const data = await page.$eval('#storageResults');
   //   const pretty = prices.map((e: any) => e.split('\n').join('').trim());
