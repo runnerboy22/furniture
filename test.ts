@@ -23,27 +23,19 @@ async function uHaul(url: string): Promise<void> {
     '#locationSearchForm > fieldset > div > div > div.cell.large-2.align-self-bottom > button'
   );
 
-  // await page.waitForSelector(
-  //   '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(2) > div.cell.medium-auto.large-3.text-right.show-for-medium > dl > dd > div > div:nth-child(2) > span'
-  // );
-
   // await page.waitForTimeout(5000);
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
   const locations = await page.$$eval(
     '#storageResults > li:nth-child(n) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a',
     (elements) => elements.map((el) => el.textContent?.trim())
   );
   const prices = await page.$$eval(
-    // '#storageResults > li',
     '#storageResults > li:nth-child(n) > div:nth-child(1) > div.cell.auto > div:nth-child(2) > div.cell.medium-auto.large-3.text-right.show-for-medium > dl > dd > div > div:nth-child(2) > span',
     (elements) => elements.map((el) => el.textContent?.trim())
   );
-
-  //   const locationPricePairs: { [location: string]: string } = {};
-  // locations.forEach((location, index) => {
-  //   locationPricePairs[location] = prices[index];
-  // });
 
   const locationPricePairs: { [location: string]: string } = {};
 
@@ -57,25 +49,29 @@ async function uHaul(url: string): Promise<void> {
     }
   });
 
-  console.log(locationPricePairs);
+  // console.log(locationPricePairs);
 
-  console.log(prices);
-  console.log(locations);
-  // const jsonPrices = JSON.stringify({ prices });
-  // console.log(jsonPrices);
-  // if (prices) {
-  //   // const data = await page.$eval('#storageResults');
-  //   const pretty = prices.map((e: any) => e.split('\n').join('').trim());
-  //   const jsonData = JSON.stringify({ pretty });
+  // click into each location to determine prices, square ft, and price per sq ft
+  // spawn multiple tabs to do this... or just do it sequentially with the back button
 
-  //   console.log(jsonData);
-  // }
-  // create on of locations and prices
+  // encapsulate forEach to improve
+  await page.click(
+    '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a'
+  );
 
-  // await page.click('#viewRates_815025');
+  await console.log('clicked into first location');
 
-  // next i want to collect prices and unit sizes to determine best price per sq ft
-  // make selection
+  // capture data
+  // await page.goto(
+  //   'https://www.uhaul.com/Storage/Walnut-Creek-CA-94598/Results/',
+  //   { waitUntil: 'networkidle2' }
+  // );
+
+  await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+
+  await page.goBack({ waitUntil: 'networkidle2' });
+
+  await console.log('went back');
 
   // setTimeout(async () => {
   //   await browser.close();
