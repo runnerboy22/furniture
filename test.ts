@@ -58,6 +58,7 @@ async function uHaul(url: string): Promise<void> {
   );
 
   await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+  // await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
   const smallDimensions = await page.$$eval(
     '#small_IndoorStorage_RoomList > li:nth-child(n) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4',
@@ -78,14 +79,24 @@ async function uHaul(url: string): Promise<void> {
     return dim.reduce((acc: number, curr: number) => acc * curr);
   });
   console.log(cubicFeet);
-  // for (const [length, width, height] of smallDimensions) {
-  //   console.log(lengthwidth, height);
-  // }
-  // const prices = await page.$$eval(
+
+  const smallPrices = await page.$$eval(
+    '#small_IndoorStorage_RoomList > li:nth-child(n) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b',
+    (elements) => elements.map((el) => el.textContent?.trim())
+  );
+
+  console.log(smallPrices);
+
+  const smallPricePerCubicFoot = smallPrices.map((price, index) => {
+    const numericPrice = parseFloat(price!.replace('$', ''));
+    const pricePerCubicFoot = numericPrice / cubicFeet[index];
+    return pricePerCubicFoot.toFixed(2);
+  });
+
+  console.log(smallPricePerCubicFoot);
+  // '#small_IndoorStorage_RoomList > li.divider.uhjs-reserve-only > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b'
 
   // const pricePerSquareFoot = await page.$$eval(
-
-  // capture data
 
   // await page.goBack({ waitUntil: 'networkidle2' });
 
