@@ -43,16 +43,68 @@ async function uHaul(url: string): Promise<void> {
     const trimmedLocation = location?.trim(); // Safely trim the location
     const trimmedPrice = prices[index]?.trim(); // Safely trim the price
 
+    // click into each location to determine prices, square ft, and price per sq ft
+    // spawn multiple tabs to do this... or just do it sequentially with the back button
+
     // Only add to the object if both location and price are defined and not empty
     if (trimmedLocation && trimmedPrice) {
       locationPricePairs[trimmedLocation] = trimmedPrice;
     }
   });
+  let allLocations = {};
+  // start appending to the object to build out the data
+  for (let i = 0; i < locations.length; i++) {
+    await page.click(
+      `#storageResults > li:nth-child(${
+        i + 1
+      }) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a`
+    );
 
-  // click into each location to determine prices, square ft, and price per sq ft
-  // spawn multiple tabs to do this... or just do it sequentially with the back button
+    // await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+    await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-  // encapsulate forEach to improve
+    const smallDimensions = await page.$$eval(
+      `#small_IndoorStorage_RoomList > li:nth-child(${
+        i + 1
+      }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+      (elements) =>
+        elements.map((el) => {
+          const dimensions = el.textContent?.trim().split('|')[1].trim() ?? '';
+          const numbers = dimensions
+            .split(' x ')
+            .map((dim: string) => parseInt(dim));
+          return numbers; // returns an array of numbers for each element
+        })
+    );
+
+    // smallDimensions is now an array of arrays, each containing three numbers
+    console.log(smallDimensions);
+    // calculate cubic feet
+    const cubicFeet = smallDimensions.map((dim) => {
+      return dim.reduce((acc: number, curr: number) => acc * curr);
+    });
+    console.log(cubicFeet);
+
+    const smallPrices = await page.$$eval(
+      `#small_IndoorStorage_RoomList > li:nth-child(${
+        i + 1
+      }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b1`,
+      (elements) => elements.map((el) => el.textContent?.trim())
+    );
+
+    console.log(smallPrices);
+
+    const smallPricePerCubicFoot = smallPrices.map((price, index) => {
+      const numericPrice = parseFloat(price!.replace('$', ''));
+      const pricePerCubicFoot = numericPrice / cubicFeet[index];
+      return pricePerCubicFoot.toFixed(2);
+    });
+
+    console.log(smallPricePerCubicFoot);
+
+    await page.goBack({ waitUntil: 'networkidle2' });
+  }
+
   await page.click(
     '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a'
   );
