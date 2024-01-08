@@ -54,18 +54,28 @@ async function uHaul(url: string): Promise<void> {
 
   type LocationData = {
     // dimensions: [string];
-    smallDimensions: string[];
-    // smallPrices: [];
-    // smallPricePerCubicFoot: [];
+    smallDimensions: number[];
+    smallPricePerCubicFoot: number;
   };
   let allLocations: Record<string, LocationData> = {};
   // let allLocations: { [location: string]: any } = {
   // smallDimensions: [],
   // smallPrices: [],
   // smallPricePerCubicFoot: [],
-  // };
-  // start appending to the object to build out the data
+  // }
+
+  // - build location object: each location will have an object of objects?
+  // Locations = {
+  // dublin: { small: { price, cubic, price/cubic},
+  //     medium: { price, cubic, price/cubic}
+  // }, livermore: { small: { price, cubic, price/cubic},
+  //     medium: { price, cubic, price/cubic}
+
   for (let i = 0; i < locations.length; i++) {
+    //   if (locations[i] === undefined) {
+    //     // If the location is undefined, skip this iteration
+    //     continue;
+    // }
     await page.click(
       `#storageResults > li:nth-child(${
         i + 1
@@ -75,50 +85,73 @@ async function uHaul(url: string): Promise<void> {
     // await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    const smallDimensions = await page.$$eval(
+    // const smallDimensions = await page.$eval(
+    //   `#small_IndoorStorage_RoomList > li:nth-child(${
+    //     i + 1
+    //   }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+
+    //   (element) =>
+    //      {
+    //       const dimensions = element.textContent?.trim().split('|')[1].trim() ?? '';
+    //       const numbers = dimensions
+    //         .split(' x ')
+    //         .map((dim: string) => parseInt(dim));
+    //       return numbers; // returns an array of numbers for each element
+    //     })
+
+    // const cubicFeet = smallDimensions.map((dim) => {
+    //   return dim.reduce((acc: number, curr: number) => acc * curr);
+    // });
+
+    // const smallPrices = await page.$eval(
+    //   `#small_IndoorStorage_RoomList > li:nth-child(${
+    //     i + 1
+    //   }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b1`,
+    //   (element) => element.textContent?.trim())
+
+    // const smallPricePerCubicFoot = smallPrices.map((price, index) => {
+    //   const numericPrice = parseFloat(price!.replace('$', ''));
+    //   const pricePerCubicFoot = numericPrice / cubicFeet[index];
+    //   return pricePerCubicFoot.toFixed(2);
+    // });
+
+    const smallDimensions = await page.$eval(
       `#small_IndoorStorage_RoomList > li:nth-child(${
         i + 1
       }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
-      (elements) =>
-        elements.map((el) => {
-          const dimensions = el.textContent?.trim().split('|')[1].trim() ?? '';
-          const numbers = dimensions
-            .split(' x ')
-            .map((dim: string) => parseInt(dim));
-          return numbers; // returns an array of numbers for each element
-        })
+      (element) => {
+        const dimensions =
+          element.textContent?.trim().split('|')[1].trim() ?? '';
+        const numbers = dimensions
+          .split(' x ')
+          .map((dim: string) => parseInt(dim));
+        return numbers; // returns an array of numbers for each element
+      }
     );
 
-    const cubicFeet = smallDimensions.map((dim) => {
-      return dim.reduce((acc: number, curr: number) => acc * curr);
-    });
-    // console.log(cubicFeet);
+    const cubicFeet = smallDimensions.reduce(
+      (acc: number, curr: number) => acc * curr,
+      1
+    );
 
-    const smallPrices = await page.$$eval(
+    const smallPrices = await page.$eval(
       `#small_IndoorStorage_RoomList > li:nth-child(${
         i + 1
       }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b1`,
-      (elements) => elements.map((el) => el.textContent?.trim())
+      (element) => element.textContent?.trim()
     );
 
-    // console.log(smallPrices);
-
-    const smallPricePerCubicFoot = smallPrices.map((price, index) => {
-      const numericPrice = parseFloat(price!.replace('$', ''));
-      const pricePerCubicFoot = numericPrice / cubicFeet[index];
-      return pricePerCubicFoot.toFixed(2);
-    });
-
-    // console.log(smallPricePerCubicFoot);
+    const numericPrice = parseFloat((smallPrices || '').replace('$', ''));
+    const smallPricePerCubicFoot = numericPrice / cubicFeet;
 
     await page.goBack({ waitUntil: 'networkidle2' });
-    // if (locations[i]) {
+
     allLocations[locations[i]] = {
       smallDimensions,
-      // Add other data as needed
+      smallPricePerCubicFoot,
     };
-    console.log(allLocations);
-    // }
+
+    console.log(allLocations.smallDimensions);
   }
 
   // await page.click(
