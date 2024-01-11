@@ -130,6 +130,8 @@ async function uHaul(url: string): Promise<void> {
     // });
     // need nested for loop to iterate through each location
     let smallDimensions: number[] = [];
+    let medDimensions: number[] = [];
+    let largeDimensions: number[] = [];
 
     const numDims = await page.$$eval(
       `#small_IndoorStorage_RoomList > li:nth-child(n
@@ -155,6 +157,34 @@ async function uHaul(url: string): Promise<void> {
         }
       );
       console.log(smallDimensions);
+    }
+
+    // med
+    const medNumDims = await page.$$eval(
+      `#medium_IndoorStorage_RoomList > li:nth-child(n) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+      (elements) => elements.map((el) => el.textContent?.trim())
+    );
+    if (medNumDims) {
+      for (let i = 0; i < medNumDims.length; i++) {
+        const medDimensionSelector = `#medium_IndoorStorage_RoomList > li:nth-child(${
+          i + 1
+        }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`;
+        await page.waitForSelector(medDimensionSelector);
+
+        const medDimensions = await page.$eval(
+          medDimensionSelector,
+          (element) => {
+            const dimensions =
+              element.textContent?.trim().split('|')[1].trim() ?? '';
+            const numbers = dimensions
+              .split(' x ')
+              .map((dim: string) => parseInt(dim));
+
+            return numbers; // returns an array of numbers for each element
+          }
+        );
+        console.log(medDimensions);
+      }
     }
 
     // add med and large dimensions plus error handling for none available
