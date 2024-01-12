@@ -99,35 +99,6 @@ async function uHaul(url: string): Promise<void> {
     // await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-    // const smallDimensions = await page.$eval(
-    //   `#small_IndoorStorage_RoomList > li:nth-child(${
-    //     i + 1
-    //   }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
-
-    //   (element) =>
-    //      {
-    //       const dimensions = element.textContent?.trim().split('|')[1].trim() ?? '';
-    //       const numbers = dimensions
-    //         .split(' x ')
-    //         .map((dim: string) => parseInt(dim));
-    //       return numbers; // returns an array of numbers for each element
-    //     })
-
-    // const cubicFeet = smallDimensions.map((dim) => {
-    //   return dim.reduce((acc: number, curr: number) => acc * curr);
-    // });
-
-    // const smallPrices = await page.$eval(
-    //   `#small_IndoorStorage_RoomList > li:nth-child(${
-    //     i + 1
-    //   }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b1`,
-    //   (element) => element.textContent?.trim())
-
-    // const smallPricePerCubicFoot = smallPrices.map((price, index) => {
-    //   const numericPrice = parseFloat(price!.replace('$', ''));
-    //   const pricePerCubicFoot = numericPrice / cubicFeet[index];
-    //   return pricePerCubicFoot.toFixed(2);
-    // });
     // need nested for loop to iterate through each location
     let smallDimensions: number[] = [];
     let medDimensions: number[] = [];
@@ -144,18 +115,15 @@ async function uHaul(url: string): Promise<void> {
       }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`;
       await page.waitForSelector(smallDimensionSelector);
 
-      const smallDimensions = await page.$eval(
-        smallDimensionSelector,
-        (element) => {
-          const dimensions =
-            element.textContent?.trim().split('|')[1].trim() ?? '';
-          const numbers = dimensions
-            .split(' x ')
-            .map((dim: string) => parseInt(dim));
+      smallDimensions = await page.$eval(smallDimensionSelector, (element) => {
+        const dimensions =
+          element.textContent?.trim().split('|')[1].trim() ?? '';
+        const numbers = dimensions
+          .split(' x ')
+          .map((dim: string) => parseInt(dim));
 
-          return numbers; // returns an array of numbers for each element
-        }
-      );
+        return numbers; // returns an array of numbers for each element
+      });
       console.log(smallDimensions);
     }
 
@@ -171,18 +139,15 @@ async function uHaul(url: string): Promise<void> {
         }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`;
         await page.waitForSelector(medDimensionSelector);
 
-        const medDimensions = await page.$eval(
-          medDimensionSelector,
-          (element) => {
-            const dimensions =
-              element.textContent?.trim().split('|')[1].trim() ?? '';
-            const numbers = dimensions
-              .split(' x ')
-              .map((dim: string) => parseInt(dim));
+        medDimensions = await page.$eval(medDimensionSelector, (element) => {
+          const dimensions =
+            element.textContent?.trim().split('|')[1].trim() ?? '';
+          const numbers = dimensions
+            .split(' x ')
+            .map((dim: string) => parseInt(dim));
 
-            return numbers; // returns an array of numbers for each element
-          }
-        );
+          return numbers; // returns an array of numbers for each element
+        });
         console.log(medDimensions);
       }
     }
@@ -192,25 +157,25 @@ async function uHaul(url: string): Promise<void> {
       (acc: number, curr: number) => acc * curr,
       1
     );
-    const selector = `#small_IndoorStorage_RoomList > li:nth-child(${
-      i + 1
-    }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b`;
+    // const selector = `#small_IndoorStorage_RoomList > li:nth-child(${
+    //   i + 1
+    // }) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div.cell.medium-4.large-3.align-self-top > dl > dd > b`;
 
-    await page.waitForSelector(selector);
-    const smallPrices = await page.$eval(selector, (element) =>
-      element.textContent?.trim()
-    );
+    // await page.waitForSelector(selector);
+    // const smallPrices = await page.$eval(selector, (element) =>
+    //   element.textContent?.trim()
+    // );
 
-    const numericPrice = parseFloat((smallPrices || '').replace('$', ''));
-    const smallPricePerCubicFoot = numericPrice / cubicFeet;
+    // const numericPrice = parseFloat((smallPrices || '').replace('$', ''));
+    // const smallPricePerCubicFoot = numericPrice / cubicFeet;
 
     await page.goBack({ waitUntil: 'networkidle2' });
-    const small = {
-      price: smallPrices,
-      cubic: cubicFeet,
-      pricePerCubic: smallPricePerCubicFoot,
-    };
-    allLocations[locations[i]] = { small };
+    // const small = {
+    //   price: smallPrices,
+    //   cubic: cubicFeet,
+    //   pricePerCubic: smallPricePerCubicFoot,
+    // };
+    // allLocations[locations[i]] = { small };
 
     console.log(allLocations);
   }
