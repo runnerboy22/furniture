@@ -1,14 +1,26 @@
-import puppeteer from 'puppeteer';
+// import puppeteer from 'puppeteer';
+import * as puppeteer from 'puppeteer';
 
 interface StorageFacilities {
   uHaul: string;
 }
 
+type PriceData = {
+  price: string;
+  cubic: number;
+  pricePerCubic: number;
+};
+
+type LocationData = {
+  small: PriceData;
+  medium?: PriceData;
+};
+
 const storageFacilities: StorageFacilities = {
   uHaul: 'https://www.uhaul.com/Storage/Online-Move-In/',
 };
 
-async function uHaul(url: string): Promise<void> {
+const launch = async (url: string): Promise<puppeteer.Page> => {
   const browser = await puppeteer.launch({
     // headless: 'new',
     headless: false,
@@ -17,14 +29,15 @@ async function uHaul(url: string): Promise<void> {
 
   await page.goto(url, { waitUntil: 'networkidle2' });
 
+  return page;
+};
+
+const zipCode = async (page: puppeteer.Page) => {
   await page.type('#movingFromInput', '94598');
 
   await page.click(
     '#locationSearchForm > fieldset > div > div > div.cell.large-2.align-self-bottom > button'
   );
-
-  // await page.waitForTimeout(5000);
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
   await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
@@ -32,7 +45,7 @@ async function uHaul(url: string): Promise<void> {
     '#storageResults > li:nth-child(n) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a',
     (elements) => elements.map((el) => el.textContent?.trim())
   );
-  const prices = await page.$$eval(
+  const cheapestPrices = await page.$$eval(
     '#storageResults > li:nth-child(n) > div:nth-child(1) > div.cell.auto > div:nth-child(2) > div.cell.medium-auto.large-3.text-right.show-for-medium > dl > dd > div > div:nth-child(2) > span',
     (elements) => elements.map((el) => el.textContent?.trim())
   );
@@ -40,28 +53,25 @@ async function uHaul(url: string): Promise<void> {
   const locationPricePairs: { [location: string]: string } = {};
 
   locations.forEach((location, index) => {
-    const trimmedLocation = location?.trim(); // Safely trim the location
-    const trimmedPrice = prices[index]?.trim(); // Safely trim the price
+    const trimmedLocation = location?.trim();
+    const trimmedPrice = cheapestPrices[index]?.trim();
 
-    // click into each location to determine prices, square ft, and price per sq ft
-    // spawn multiple tabs to do this... or just do it sequentially with the back button
-
-    // Only add to the object if both location and price are defined and not empty
+    // do i need trimmed?
     if (trimmedLocation && trimmedPrice) {
       locationPricePairs[trimmedLocation] = trimmedPrice;
     }
   });
+};
 
-  type PriceData = {
-    price: string;
-    cubic: number;
-    pricePerCubic: number;
-  };
+async function uHaul(url: string): Promise<void> {
+  // await page.waitForTimeout(5000);
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  type LocationData = {
-    small: PriceData;
-    medium?: PriceData;
-  };
+  // click into each location to determine prices, square ft, and price per sq ft
+  // spawn multiple tabs to do this... or just do it sequentially with the back button
+
+  // Only add to the object if both location and price are defined and not empty
+
   // type LocationData = {
   //   // dimensions: [string];
   //   location: {
@@ -124,7 +134,7 @@ async function uHaul(url: string): Promise<void> {
 
         return numbers; // returns an array of numbers for each element
       });
-      console.log(smallDimensions);
+      console.log('smallD', smallDimensions);
     }
 
     // med
@@ -148,7 +158,7 @@ async function uHaul(url: string): Promise<void> {
 
           return numbers; // returns an array of numbers for each element
         });
-        console.log(medDimensions);
+        console.log('mid', medDimensions);
       }
     }
 
@@ -177,7 +187,7 @@ async function uHaul(url: string): Promise<void> {
     // };
     // allLocations[locations[i]] = { small };
 
-    console.log(allLocations);
+    console.log('all locations', allLocations);
   }
 
   // await page.click(
