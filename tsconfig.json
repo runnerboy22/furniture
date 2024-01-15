@@ -27,7 +27,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "jest.config.js"
+    "jest.config.js",
+    "__tests__/scrape.test.ts",
+    "jest-puppeteer.config.js"
   ],
   "exclude": ["node_modules"]
 }
