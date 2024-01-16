@@ -16,7 +16,7 @@ type LocationData = {
   medium?: PriceData;
 };
 
-const storageFacilities: StorageFacilities = {
+export const storageFacilities: StorageFacilities = {
   uHaul: 'https://www.uhaul.com/Storage/Online-Move-In/',
 };
 
@@ -61,33 +61,42 @@ const zipCode = async (page: puppeteer.Page) => {
       locationPricePairs[trimmedLocation] = trimmedPrice;
     }
   });
+  return locationPricePairs;
 };
 
-async function uHaul(url: string): Promise<void> {
-  // await page.waitForTimeout(5000);
-  // await new Promise((resolve) => setTimeout(resolve, 5000));
-
-  // click into each location to determine prices, square ft, and price per sq ft
-  // spawn multiple tabs to do this... or just do it sequentially with the back button
-
-  // Only add to the object if both location and price are defined and not empty
-
-  // type LocationData = {
-  //   // dimensions: [string];
-  //   location: {
-  //     small: { price: number[]; cubic: number[]; pricePerCubic: number[] };
-  //     medium: { price; cubic; pricePerCubic };
-  //     // smallDimensions: number[];
-  //     // smallPricePerCubicFoot: number;
-  //   };
-  // };
-  let allLocations: Record<string, LocationData> = {}; // let allLocations: Record<string, LocationData> = {};
-  // let allLocations: { [location: string]: any } = {
-  // smallDimensions: [],
-  // smallPrices: [],
-  // smallPricePerCubicFoot: [],
-  // }
+export async function uHaul(url: string): Promise<any> {
+  const page = await launch(url);
+  const locationPricePairs = await zipCode(page);
+  console.log('locationPricePairs', locationPricePairs);
+  return locationPricePairs;
 }
+
+uHaul(storageFacilities.uHaul);
+
+// await page.waitForTimeout(5000);
+// await new Promise((resolve) => setTimeout(resolve, 5000));
+
+// click into each location to determine prices, square ft, and price per sq ft
+// spawn multiple tabs to do this... or just do it sequentially with the back button
+
+// Only add to the object if both location and price are defined and not empty
+
+// type LocationData = {
+//   // dimensions: [string];
+//   location: {
+//     small: { price: number[]; cubic: number[]; pricePerCubic: number[] };
+//     medium: { price; cubic; pricePerCubic };
+//     // smallDimensions: number[];
+//     // smallPricePerCubicFoot: number;
+//   };
+// };
+let allLocations: Record<string, LocationData> = {}; // let allLocations: Record<string, LocationData> = {};
+// let allLocations: { [location: string]: any } = {
+// smallDimensions: [],
+// smallPrices: [],
+// smallPricePerCubicFoot: [],
+// }
+// }
 // - build location object: each location will have an object of objects?
 // Locations = {
 // dublin: { small: { price, cubic, price/cubic},

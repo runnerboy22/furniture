@@ -31,5 +31,10 @@
     "__tests__/scrape.test.ts",
     "jest-puppeteer.config.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }
