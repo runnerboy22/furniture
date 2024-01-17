@@ -1,7 +1,7 @@
 // import puppeteer from 'puppeteer';
 import * as puppeteer from 'puppeteer';
 
-interface StorageFacilities {
+export interface StorageFacility {
   uHaul: string;
 }
 
@@ -15,8 +15,13 @@ type LocationData = {
   small: PriceData;
   medium?: PriceData;
 };
+interface zipCode {
+  WC: string;
+}
 
-export const storageFacilities: StorageFacilities = {
+const zipCode = { WC: '94598' };
+
+export const storageFacilities: StorageFacility = {
   uHaul: 'https://www.uhaul.com/Storage/Online-Move-In/',
 };
 
@@ -32,8 +37,8 @@ const launch = async (url: string): Promise<puppeteer.Page> => {
   return page;
 };
 
-const zipCode = async (page: puppeteer.Page) => {
-  await page.type('#movingFromInput', '94598');
+const area = async (page: puppeteer.Page, zipCode: zipCode) => {
+  await page.type('#movingFromInput', zipCode.WC);
 
   await page.click(
     '#locationSearchForm > fieldset > div > div > div.cell.large-2.align-self-bottom > button'
@@ -66,18 +71,19 @@ const zipCode = async (page: puppeteer.Page) => {
 
 export async function uHaul(url: string): Promise<any> {
   const page = await launch(url);
-  const locationPricePairs = await zipCode(page);
+  const locationPricePairs = await area(page, zipCode);
   console.log('locationPricePairs', locationPricePairs);
   return locationPricePairs;
 }
 
-uHaul(storageFacilities.uHaul);
+// uHaul(storageFacilities.uHaul);
 
 // await page.waitForTimeout(5000);
 // await new Promise((resolve) => setTimeout(resolve, 5000));
 
 // click into each location to determine prices, square ft, and price per sq ft
 // spawn multiple tabs to do this... or just do it sequentially with the back button
+// tradeoff: more compute vs slower
 
 // Only add to the object if both location and price are defined and not empty
 

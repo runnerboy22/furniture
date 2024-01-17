@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { uHaul } from '@/lib/scraper';
+import { storageFacilities } from '@/lib/scraper';
 
 export async function POST(req: Request) {
   try {
@@ -11,8 +13,8 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    console.log('get');
-    return NextResponse.json({ message: 'reCAPTCHA verification successful' });
+    const example = await uHaul(storageFacilities.uHaul);
+    return NextResponse.json(example);
   } catch (err) {
     return NextResponse.json({ message: 'Internal server error' });
   }
