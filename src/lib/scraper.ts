@@ -10,7 +10,9 @@ type PriceData = {
   cubic: number;
   pricePerCubic: number;
 };
-
+type LocationPricePairs = {
+  [location: string]: string;
+};
 type LocationData = {
   small: PriceData;
   medium?: PriceData;
@@ -69,7 +71,7 @@ const area = async (page: puppeteer.Page, zipCode: zipCode) => {
   return locationPricePairs;
 };
 
-export async function uHaul(url: string): Promise<any> {
+export async function uHaul(url: string): Promise<LocationPricePairs> {
   const page = await launch(url);
   const locationPricePairs = await area(page, zipCode);
   console.log('locationPricePairs', locationPricePairs);
