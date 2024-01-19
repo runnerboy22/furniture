@@ -5,6 +5,16 @@ export interface StorageFacility {
   uHaul: string;
 }
 
+// type LocationData = {
+//   // dimensions: [string];
+//   location: {
+//     small: { price: number[]; cubic: number[]; pricePerCubic: number[] };
+//     medium: { price; cubic; pricePerCubic };
+//     // smallDimensions: number[];
+//     // smallPricePerCubicFoot: number;
+//   };
+// };
+
 type PriceData = {
   price: string;
   cubic: number;
@@ -60,11 +70,9 @@ const area = async (page: puppeteer.Page, zipCode: zipCode) => {
   const locationPricePairs: { [location: string]: string } = {};
 
   locations.forEach((location, index) => {
-    const trimmedLocation = location?.trim();
-    const trimmedPrice = cheapestPrices[index]?.trim();
-
-    // do i need trimmed?
-    if (trimmedLocation && trimmedPrice) {
+    if (location && cheapestPrices[index]) {
+      const trimmedLocation = location.trim();
+      const trimmedPrice = cheapestPrices[index]!.trim();
       locationPricePairs[trimmedLocation] = trimmedPrice;
     }
   });
@@ -89,15 +97,6 @@ export async function uHaul(url: string): Promise<LocationPricePairs> {
 
 // Only add to the object if both location and price are defined and not empty
 
-// type LocationData = {
-//   // dimensions: [string];
-//   location: {
-//     small: { price: number[]; cubic: number[]; pricePerCubic: number[] };
-//     medium: { price; cubic; pricePerCubic };
-//     // smallDimensions: number[];
-//     // smallPricePerCubicFoot: number;
-//   };
-// };
 let allLocations: Record<string, LocationData> = {}; // let allLocations: Record<string, LocationData> = {};
 // let allLocations: { [location: string]: any } = {
 // smallDimensions: [],
@@ -111,18 +110,25 @@ let allLocations: Record<string, LocationData> = {}; // let allLocations: Record
 //     medium: { price, cubic, price/cubic}
 // }, livermore: { small: { price, cubic, price/cubic},
 //     medium: { price, cubic, price/cubic}
+// const locationData = async (uhaul) => {
+async function getSize() {
+  const size = Object.keys(await uHaul).length;
+  for (let i = 0; i < size; i++) {
+    //   if (locations[i] === undefined) {
+    //     // If the location is undefined, skip this iteration
+    //     continue;
+    // }
+    await page.click(
+      `#storageResults > li:nth-child(${
+        i + 1
+      }) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a`
+    );
+  }
+}
 
-//   for (let i = 0; i < locations.length; i++) {
-//     //   if (locations[i] === undefined) {
-//     //     // If the location is undefined, skip this iteration
-//     //     continue;
-//     // }
-//     await page.click(
-//       `#storageResults > li:nth-child(${
-//         i + 1
-//       }) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a`
-//     );
+getSize();
 
+// };
 //     // await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
 //     await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
