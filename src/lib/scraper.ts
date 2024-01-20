@@ -111,37 +111,45 @@ let allLocations: Record<string, LocationData> = {}; // let allLocations: Record
 // }, livermore: { small: { price, cubic, price/cubic},
 //     medium: { price, cubic, price/cubic}
 // const locationData = async (uhaul) => {
-async function getSize() {
-  const size = Object.keys(await uHaul).length;
-  for (let i = 0; i < size; i++) {
-    //   if (locations[i] === undefined) {
-    //     // If the location is undefined, skip this iteration
-    //     continue;
-    // }
-    await page.click(
-      `#storageResults > li:nth-child(${
-        i + 1
-      }) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a`
-    );
-  }
+export async function getSize(location: string) {
+  const size = Object.keys(await uHaul(location)).length;
+  console.log('size', size);
+  // for (let i = 0; i < size; i++) {
+  //   //   if (locations[i] === undefined) {
+  //   //     // If the location is undefined, skip this iteration
+  //   //     continue;
+  //   // }
+  //   await page.waitForNavigation({ waitUntil: 'networkidle0' });
+  //   await page.click(
+  //     `#storageResults > li:nth-child(${
+  //       i + 1
+  //     }) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a`
+  //   );
+  //   const numDims = await page.$$eval(
+  //     `#small_IndoorStorage_RoomList > li:nth-child(n
+  //     ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+  //     (elements) => elements.map((el) => el.textContent?.trim())
+  //   );
+  //   console.log('numDims', numDims);
+  // }
 }
 
-getSize();
+// getSize();
 
 // };
 //     // await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
-//     await page.waitForNavigation({ waitUntil: 'networkidle0' });
+// await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
 //     // need nested for loop to iterate through each location
 //     let smallDimensions: number[] = [];
 //     let medDimensions: number[] = [];
 //     let largeDimensions: number[] = [];
 
-//     const numDims = await page.$$eval(
-//       `#small_IndoorStorage_RoomList > li:nth-child(n
-//       ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
-//       (elements) => elements.map((el) => el.textContent?.trim())
-//     );
+// const numDims = await page.$$eval(
+//   `#small_IndoorStorage_RoomList > li:nth-child(n
+//   ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+//   (elements) => elements.map((el) => el.textContent?.trim())
+// );
 //     for (let i = 0; i < numDims.length; i++) {
 //       const smallDimensionSelector = `#small_IndoorStorage_RoomList > li:nth-child(${
 //         i + 1
