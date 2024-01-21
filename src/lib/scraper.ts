@@ -37,7 +37,7 @@ export const storageFacilities: StorageFacility = {
   uHaul: 'https://www.uhaul.com/Storage/Online-Move-In/',
 };
 
-const launch = async (url: string): Promise<puppeteer.Page> => {
+export const launch = async (url: string) => {
   const browser = await puppeteer.launch({
     // headless: 'new',
     headless: false,
@@ -46,7 +46,14 @@ const launch = async (url: string): Promise<puppeteer.Page> => {
 
   await page.goto(url, { waitUntil: 'networkidle2' });
 
-  return page;
+  const locationPricePairs = await area(page, zipCode);
+
+  setTimeout(async () => {
+    await browser.close();
+    console.log('Browser closed after 15 seconds');
+  }, 15000);
+
+  return locationPricePairs;
 };
 
 const area = async (page: puppeteer.Page, zipCode: zipCode) => {
@@ -79,12 +86,12 @@ const area = async (page: puppeteer.Page, zipCode: zipCode) => {
   return locationPricePairs;
 };
 
-export async function uHaul(url: string): Promise<LocationPricePairs> {
-  const page = await launch(url);
-  const locationPricePairs = await area(page, zipCode);
-  console.log('locationPricePairs', locationPricePairs);
-  return locationPricePairs;
-}
+// export async function uHaul(url: string): Promise<LocationPricePairs> {
+//   const page = await launch(url);
+//   const locationPricePairs = await area(page, zipCode);
+//   console.log('locationPricePairs', locationPricePairs);
+//   return locationPricePairs;
+// }
 
 // uHaul(storageFacilities.uHaul);
 
@@ -112,30 +119,26 @@ let allLocations: Record<string, LocationData> = {}; // let allLocations: Record
 //     medium: { price, cubic, price/cubic}
 // const locationData = async (uhaul) => {
 export async function getSize(location: string) {
-  const size = Object.keys(await uHaul(location)).length;
-  console.log('size', size);
-  // for (let i = 0; i < size; i++) {
-  //   //   if (locations[i] === undefined) {
-  //   //     // If the location is undefined, skip this iteration
-  //   //     continue;
-  //   // }
-  //   await page.waitForNavigation({ waitUntil: 'networkidle0' });
-  //   await page.click(
-  //     `#storageResults > li:nth-child(${
-  //       i + 1
-  //     }) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a`
-  //   );
-  //   const numDims = await page.$$eval(
-  //     `#small_IndoorStorage_RoomList > li:nth-child(n
-  //     ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
-  //     (elements) => elements.map((el) => el.textContent?.trim())
-  //   );
-  //   console.log('numDims', numDims);
+  // const size = Object.keys(await uHaul(location)).length;
+  // console.log('size', size);
+  // for (let i = 1; i < size; i++) {
+  // if (location[i] === undefined) {
+  //   console.log('location undefined');
+  //   continue;
   // }
+  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+  const selector =
+    '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a';
+  await page.click(selector);
+  await console.log('clicked');
+  // const numDims = await page.$$eval(
+  //   `#small_IndoorStorage_RoomList > li:nth-child(n
+  //   ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+  //   (elements) => elements.map((el) => el.textContent?.trim())
+  // );
+  // console.log('numDims', numDims);
 }
-
-// getSize();
-
+// }
 // };
 //     // await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
 // await page.waitForNavigation({ waitUntil: 'networkidle0' });
