@@ -42,21 +42,28 @@ export const launch = async (url: string) => {
     // headless: 'new',
     headless: false,
   });
-  const page = await browser.newPage();
+  try {
+    let page = await browser.newPage();
 
-  await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-  const locationPricePairs = await area(page, zipCode);
+    await area(page, zipCode);
 
-  setTimeout(async () => {
-    await browser.close();
-    console.log('Browser closed after 15 seconds');
-  }, 15000);
+    const selector = await getSize(page);
 
-  return locationPricePairs;
+    return selector;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setTimeout(async () => {
+      await browser.close();
+      console.log('Browser closed after 15 seconds');
+    }, 15000);
+  }
 };
 
 const area = async (page: puppeteer.Page, zipCode: zipCode) => {
+  console.log('zipCode', zipCode);
   await page.type('#movingFromInput', zipCode.WC);
 
   await page.click(
@@ -83,6 +90,7 @@ const area = async (page: puppeteer.Page, zipCode: zipCode) => {
       locationPricePairs[trimmedLocation] = trimmedPrice;
     }
   });
+
   return locationPricePairs;
 };
 
@@ -118,7 +126,7 @@ let allLocations: Record<string, LocationData> = {}; // let allLocations: Record
 // }, livermore: { small: { price, cubic, price/cubic},
 //     medium: { price, cubic, price/cubic}
 // const locationData = async (uhaul) => {
-export async function getSize(location: string) {
+export async function getSize(page: puppeteer.Page) {
   // const size = Object.keys(await uHaul(location)).length;
   // console.log('size', size);
   // for (let i = 1; i < size; i++) {
@@ -126,17 +134,25 @@ export async function getSize(location: string) {
   //   console.log('location undefined');
   //   continue;
   // }
-  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+  console.log('Current URL:', page.url());
+
+  // wait for dom to load
+
   const selector =
     '#storageResults > li:nth-child(1) > div:nth-child(1) > div.cell.auto > div:nth-child(1) > div.cell.small-8.medium-auto > h3 > a';
+  // await page.click(selector);
+  await page.waitForSelector(selector, { timeout: 5000 }); // 5 seconds  await console.log('dom loaded');
+  // await page.waitForSelector(selector);
+
+  // click selector
   await page.click(selector);
-  await console.log('clicked');
-  // const numDims = await page.$$eval(
-  //   `#small_IndoorStorage_RoomList > li:nth-child(n
-  //   ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
-  //   (elements) => elements.map((el) => el.textContent?.trim())
-  // );
-  // console.log('numDims', numDims);
+  const numDims = await page.$$eval(
+    `#small_IndoorStorage_RoomList > li:nth-child(n
+    ) > div > div.grid-x.grid-margin-x.align-left.medium-grid-expand-x > div:nth-child(2) > div > div.cell.auto > h4`,
+    (elements) => elements.map((el) => el.textContent?.trim())
+  );
+  console.log('numDims', numDims);
+  return numDims;
 }
 // }
 // };
